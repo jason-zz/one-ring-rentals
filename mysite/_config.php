@@ -7,7 +7,7 @@ global $project;
 $project = 'mysite';
 
 global $database;
-$database = '';
+$database = 'onering';
 
 require_once('conf/ConfigureFromEnv.php');
 
@@ -21,6 +21,6 @@ if(Director::isTest()) {
 }
 
 if(Director::isLive()) {
-    SS_Log::add_writer(new SS_LogEmailWriter('me@example.com'), SS_Log::ERR);
+//     SS_Log::add_writer(new SS_LogEmailWriter('me@example.com'), SS_Log::ERR);
 }
 

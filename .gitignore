@@ -1,17 +1,25 @@
-assets/*
-_ss_environment.php
-tools/phing-metadata
-silverstripe-cache
-.buildpath
-.project
-.settings
-.idea
-.DS_Store
-vendor/
-framework/
-cms/
-blog/
-lumberjack/
-reports/
-siteconfig/
-tagfield/
+##### ignore everything...
+/*
+
+##### ...but
+!/.htaccess
+!/.gitignore
+!/composer.json
+!/composer.lock
+!/index.php
+!/robots.txt
+!/README.md
+!/build.xml
+!/phpunit.php
+!/phpunit.xml
+!/mysite
+
+##### theme stuff
+!/themes/
+/themes/simple
+/themes/simple/
+
+##### still need to some folders.
+**/_combinedfiles
+**/node_modules
+**/bower_components

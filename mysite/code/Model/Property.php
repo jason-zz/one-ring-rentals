@@ -1,6 +1,7 @@
 <?php
 
 use SilverStripe\Assets\Image;
+use SilverStripe\ORM\FieldType\DBDate;
 use SilverStripe\ORM\Filters\PartialMatchFilter;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\Filters\ExactMatchFilter;
@@ -14,9 +15,20 @@ use SilverStripe\Forms\CheckboxField;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\ORM\DataObject;
 
+/**
+ * Class Property
+ *
+ * @property DBDate AvailableStart
+ * @property DBDate AvailableEnd
+ * @property boolean FeaturedOnHomepage
+ * @property String Title
+ * @property String Bedrooms
+ * @property String Bathrooms
+ * @property String PricePerNight
+ * @property String Description
+ */
 class Property extends DataObject
 {
-
     /**
      * @var array
      */
@@ -30,7 +42,7 @@ class Property extends DataObject
         'AvailableEnd' => 'Date',
         'Description' => 'Text'
     );
-
+    
     /**
      * @var array
      */
@@ -38,7 +50,7 @@ class Property extends DataObject
         'Region' => 'Region',
         'PrimaryPhoto' => Image::class
     );
-
+    
     /**
      * @var array
      */
@@ -48,7 +60,7 @@ class Property extends DataObject
         'PricePerNight.Nice' => 'Price',
         'FeaturedOnHomepage.Nice' => 'Featured?'
     );
-
+    
     /**
      * Return the searchable fields for our gridfield.
      * @return array
@@ -65,10 +77,10 @@ class Property extends DataObject
                 'filter' => ExactMatchFilter::class,
                 'title' => 'Region',
                 'field' => DropdownField::create('RegionID')
-                    ->setSource(
-                        Region::get()->map('ID', 'Title')
+                ->setSource(
+                    Region::get()->map('ID', 'Title')
                     )
-                    ->setEmptyString('-- Any region --')
+                ->setEmptyString('-- Any region --')
             ),
             'FeaturedOnHomepage' => array(
                 'filter' => ExactMatchFilter::class,
@@ -76,7 +88,7 @@ class Property extends DataObject
             )
         );
     }
-
+    
     /**
      * Return the CMSFields for our Property ModelAdmin
      *
@@ -85,34 +97,54 @@ class Property extends DataObject
     public function getCMSFields()
     {
         $fields = FieldList::create(TabSet::create('Root'));
-
+        
         $fields->addFieldsToTab('Root.Main', array(
             TextField::create('Title'),
             TextareaField::create('Description'),
             CurrencyField::create('PricePerNight', 'Price (per night)'),
             DropdownField::create('Bedrooms')
-                ->setSource(ArrayLib::valuekey(range(1, 10))),
+            ->setSource(ArrayLib::valuekey(range(1, 10))),
             DropdownField::create('Bathrooms')
-                ->setSource(ArrayLib::valuekey(range(1, 10))),
+            ->setSource(ArrayLib::valuekey(range(1, 10))),
             DropdownField::create('RegionID', 'Region')
-                ->setSource(Region::get()->map('ID', 'Title'))
-                ->setEmptyString('-- Select a region --'),
+            ->setSource(Region::get()->map('ID', 'Title'))
+            ->setEmptyString('-- Select a region --'),
             CheckboxField::create('FeaturedOnHomepage', 'Feature on homepage')
         ));
-
+        
         $fields->addFieldToTab('Root.Photos', $upload = UploadField::create(
             'PrimaryPhoto',
             'Primary photo'
-        ));
-
+            ));
+        
         $upload->getValidator()->setAllowedExtensions(array(
             'png',
             'jpeg',
             'jpg',
             'gif'
         ));
-
+        
         $upload->setFolderName('property-photos');
         return $fields;
+    }
+    
+    /**
+     * Returns true if the property is available at the current time.
+     *
+     * @return bool
+     */
+    public function isAvailable()
+    {
+        if ($this->AvailableStart && $this->AvailableEnd) {
+            $now = new DateTime(date("Y-m-d"));
+            
+            $startDate = new DateTime($this->AvailableStart);
+            $endDate = new DateTime($this->AvailableEnd);
+            
+            if ($now >= $startDate && $now <= $endDate) {
+                return true;
+            };
+        }
+        return false;
     }
 }
