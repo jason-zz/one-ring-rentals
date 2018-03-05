@@ -10,7 +10,8 @@ use SilverStripe\Forms\TextField;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Forms\CheckboxSetField;
 use SilverStripe\Forms\DropdownField;
-
+use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
+use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 
 /**
  * Class ArticlePage
@@ -19,7 +20,7 @@ use SilverStripe\Forms\DropdownField;
  * @property string Author
  * @method DataList Comments
  */
-class ArticlePage extends Page
+class ArticlePage extends Page implements ScaffoldingProvider
 {
     private static $db = array(
         'Date' => 'Date',
@@ -86,5 +87,24 @@ class ArticlePage extends Page
             return implode(', ', $this->Categories()->column('Title'));
         }
     }
-
+    
+    public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->type("ArticlePage")
+                ->addFields(array_keys(self::$db))
+                ->operation(SchemaScaffolder::READ)
+                    ->end()
+                ->operation(SchemaScaffolder::UPDATE)
+                    ->end()
+                ->nestedQuery('Comments')
+                    ->end()
+                ->end()
+            ->type("ArticleComment")
+                ->addAllFields()
+                ->operation(SchemaScaffolder::READ)
+                    ->end();
+        
+        return $scaffolder;
+    }
 }
